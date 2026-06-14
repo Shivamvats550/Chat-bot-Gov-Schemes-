@@ -1,0 +1,6 @@
+flask
+python-dotenv
+duckduckgo-search
+numpy
+faiss-cpu
+sentence-transformers

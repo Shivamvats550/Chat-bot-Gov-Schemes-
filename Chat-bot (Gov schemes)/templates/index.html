@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GovSchemes Advisor & Chatbot</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <style>
+        :root {
+            --bg: #070a13;
+            --glass: rgba(15, 22, 40, 0.7);
+            --border: rgba(255, 255, 255, 0.05);
+            --text: #f8fafc;
+            --text-mute: #94a3b8;
+            --primary-grad: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            --bubble-user: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            --bubble-bot: rgba(255, 255, 255, 0.03);
+            --shadow: 0 24px 48px rgba(0, 0, 0, 0.5);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Outfit', sans-serif; }
+        body { background: var(--bg); color: var(--text); height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; position: relative; }
+
+        /* Glow effects for premium background styling */
+        .glow { position: absolute; border-radius: 50%; background: radial-gradient(circle, rgba(99, 102, 241, 0.14) 0%, transparent 70%); filter: blur(50px); z-index: -1; pointer-events: none; }
+        .glow-1 { width: 600px; height: 600px; top: -10%; left: -10%; }
+        .glow-2 { width: 700px; height: 700px; bottom: -15%; right: -10%; }
+
+        /* Glassmorphism Chat Container */
+        .app {
+            background: var(--glass);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            width: 90%;
+            max-width: 850px;
+            height: 85vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            animation: appFade 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .header {
+            padding: 22px 28px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.01);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            font-size: 1.35rem;
+            background: var(--primary-grad);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand i { -webkit-text-fill-color: #6366f1; font-size: 1.5rem; filter: drop-shadow(0 0 8px rgba(99, 102, 241, 0.4)); }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        /* Active status pill badge */
+        .status {
+            font-size: 0.75rem;
+            color: #10b981;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 600;
+            background: rgba(16, 185, 129, 0.08);
+            padding: 5px 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            letter-spacing: 0.02em;
+        }
+
+        .status::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #10b981;
+            animation: pulse 2s infinite;
+        }
+
+        .chat-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 28px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            scrollbar-width: thin;
+        }
+
+        /* Slim premium scrollbar */
+        .chat-area::-webkit-scrollbar { width: 6px; }
+        .chat-area::-webkit-scrollbar-track { background: transparent; }
+        .chat-area::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+        .chat-area::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
+
+        /* Welcome Landing Layout */
+        .welcome {
+            text-align: center;
+            margin: auto;
+            max-width: 560px;
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .welcome-icon {
+            font-size: 3.5rem;
+            background: var(--primary-grad);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+            filter: drop-shadow(0 0 12px rgba(99, 102, 241, 0.3));
+        }
+
+        .welcome h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.02em; }
+        .welcome p { color: var(--text-mute); font-size: 0.98rem; line-height: 1.6; }
+
+        /* Suggestion cards grid */
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+        .card {
+            background: rgba(255, 255, 255, 0.01);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 16px;
+            padding: 16px 20px;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            color: inherit;
+            outline: none;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(168, 85, 247, 0.08) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 0;
+        }
+
+        .card:hover {
+            border-color: rgba(99, 102, 241, 0.3);
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3), 0 0 15px rgba(99, 102, 241, 0.1);
+        }
+
+        .card:hover::before { opacity: 1; }
+        .card strong { display: block; font-size: 0.92rem; margin-bottom: 2px; font-weight: 600; position: relative; z-index: 1; }
+        .card span { font-size: 0.78rem; color: var(--text-mute); position: relative; z-index: 1; }
+
+        /* Chat Messages layout */
+        .msg-row {
+            display: flex;
+            flex-direction: column;
+            max-width: 80%;
+            animation: slideMsg 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .msg-row.user { align-self: flex-end; }
+        .msg-row.bot { align-self: flex-start; }
+
+        .msg {
+            padding: 14px 20px;
+            border-radius: 18px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            word-wrap: break-word;
+        }
+
+        .user .msg {
+            background: var(--bubble-user);
+            color: white;
+            border-bottom-right-radius: 4px;
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.2);
+        }
+
+        .bot .msg {
+            background: var(--bubble-bot);
+            border: 1px solid var(--border);
+            border-bottom-left-radius: 4px;
+        }
+
+        /* Message interior Markdown elements */
+        .msg h1, .msg h2, .msg h3 {
+            margin-top: 14px;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: var(--text);
+        }
+        .msg h1 { font-size: 1.25rem; }
+        .msg h2 { font-size: 1.15rem; }
+        .msg h3 { font-size: 1.05rem; }
+        
+        .msg ul, .msg ol {
+            margin-left: 20px;
+            margin-top: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .msg li {
+            margin-bottom: 4px;
+        }
+        
+        .msg blockquote {
+            border-left: 3px solid #6366f1;
+            padding-left: 12px;
+            margin: 10px 0;
+            color: var(--text-mute);
+            font-style: italic;
+            background: rgba(99, 102, 241, 0.05);
+            border-radius: 0 8px 8px 0;
+            padding-top: 4px;
+            padding-bottom: 4px;
+        }
+        
+        code.inline-code {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9em;
+            color: #f472b6;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Bottom text input row styling */
+        .input-area { 
+            padding: 20px 28px; 
+            border-top: 1px solid var(--border); 
+            display: flex; 
+            gap: 12px; 
+            background: rgba(9, 13, 22, 0.4);
+            align-items: center;
+        }
+        .input-wrapper { flex: 1; position: relative; }
+
+        input {
+            width: 100%;
+            background: rgba(10, 15, 30, 0.6);
+            border: 1px solid var(--border);
+            color: inherit;
+            padding: 14px 22px;
+            border-radius: 16px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.25s ease;
+        }
+
+        input:focus {
+            border-color: rgba(99, 102, 241, 0.6);
+            background: rgba(10, 15, 30, 0.85);
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.15);
+        }
+
+        button.send {
+            background: var(--primary-grad);
+            border: none;
+            color: white;
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.15rem;
+            transition: all 0.25s ease;
+            flex-shrink: 0;
+            outline: none;
+        }
+
+        button.send:hover { transform: scale(1.05); box-shadow: 0 4px 15px rgba(99, 102, 241, 0.35); }
+        button.send:active { transform: scale(0.98); }
+
+        /* Typing loader animation dot bubble */
+        .typing {
+            display: none;
+            align-items: center;
+            gap: 6px;
+            padding: 14px 20px;
+            background: var(--bubble-bot);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            border-bottom-left-radius: 4px;
+            align-self: flex-start;
+            margin: 0 28px 16px;
+            animation: slideMsg 0.3s ease-out;
+        }
+
+        .typing span {
+            width: 6px;
+            height: 6px;
+            background: var(--text-mute);
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+
+        .typing span:nth-child(1) { animation-delay: -0.32s; }
+        .typing span:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes appFade { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: scale(1); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideMsg { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+        @media (max-width: 600px) {
+            body { padding: 0; }
+            .app { border-radius: 0; border: none; width: 100%; height: 100vh; }
+            .grid { grid-template-columns: 1fr; }
+            .header { padding: 16px 20px; }
+            .chat-area { padding: 20px; }
+            .input-area { padding: 16px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="glow glow-1"></div>
+    <div class="glow glow-2"></div>
+
+    <div class="app">
+        <div class="header">
+            <div class="brand">
+                <i class="fa-solid fa-compass-drafting"></i>
+                <span>GovSchemes Advisor</span>
+            </div>
+            <div class="header-controls">
+                <div class="status">Agent Active</div>
+            </div>
+        </div>
+
+        <div class="chat-area" id="chat-area">
+            <!-- Welcome screen with suggested questions -->
+            <div class="welcome" id="welcome-screen">
+                <div class="welcome-header">
+                    <i class="fa-solid fa-compass-drafting welcome-icon"></i>
+                    <h1>How can I help you today?</h1>
+                    <p>Explore government schemes and get direct, context-grounded information instantly using semantic vector search.</p>
+                </div>
+                <div class="grid">
+                    <button class="card" onclick="triggerSuggestion('Immediate Relief Assistance scheme detail')">
+                        <strong>Relief Assistance</strong>
+                        <span>Check missing fishermen support details</span>
+                    </button>
+                    <button class="card" onclick="triggerSuggestion('how to improve the Garuda Scheme for Funeral Expense')">
+                        <strong>Garuda Scheme Details</strong>
+                        <span>Find funeral schemes and benefits</span>
+                    </button>
+                    <button class="card" onclick="triggerSuggestion('what are eligibility details for Indira Mahila Shakti Udyam Yojana')">
+                        <strong>Women MSME Loans</strong>
+                        <span>Retrieve criteria to optimize loans</span>
+                    </button>
+                    <button class="card" onclick="triggerSuggestion('Incentive Scheme for MSMEs in Powerloom Sector eligibility')">
+                        <strong>Powerloom Sector Scheme</strong>
+                        <span>Check eligibility & capital subsidies</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Bot Typing Indicator -->
+        <div class="typing" id="typing-indicator">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+
+        <div class="input-area">
+            <div class="input-wrapper">
+                <input type="text" id="user-input" placeholder="Ask about a scheme..." autocomplete="off">
+            </div>
+            <button class="send" id="send-button"><i class="fa-solid fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <script>
+        // DOM Element bindings
+        const chatArea = document.getElementById("chat-area");
+        const userInput = document.getElementById("user-input");
+        const sendButton = document.getElementById("send-button");
+        const typingIndicator = document.getElementById("typing-indicator");
+        const welcomeScreen = document.getElementById("welcome-screen");
+
+        /**
+         * Appends a new message bubble to the chat container
+         */
+        function addMessage(text, isUser = false) {
+            if (welcomeScreen) welcomeScreen.style.display = "none";
+
+            const row = document.createElement("div");
+            row.classList.add("msg-row", isUser ? "user" : "bot");
+
+            const msgDiv = document.createElement("div");
+            msgDiv.classList.add("msg");
+            msgDiv.innerHTML = formatMarkdownText(text);
+            row.appendChild(msgDiv);
+
+            chatArea.appendChild(row);
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+
+        /**
+         * Converts basic markdown notations (lists, headers, bold, code) to browser HTML.
+         * Enforces escaping to protect against script execution blocks.
+         */
+        function formatMarkdownText(text) {
+            if (!text) return "";
+            
+            let formatted = text;
+            
+            // Escape HTML tags to protect injection
+            formatted = formatted
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;");
+            
+            // Inline code snippet `code`
+            formatted = formatted.replace(/`([^`\n]+)`/g, '<code class="inline-code">$1</code>');
+            
+            // Blockquotes
+            formatted = formatted.replace(/^&gt;\s+(.+)$/gm, '<blockquote>$1</blockquote>');
+            
+            // Bold text **text**
+            formatted = formatted.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+            
+            // Italic text *text* or _text_
+            formatted = formatted.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+            formatted = formatted.replace(/_([^_]+)_/g, '<em>$1</em>');
+            
+            // Headers
+            formatted = formatted.replace(/^###\s+(.+)$/gm, '<h3>$1</h3>');
+            formatted = formatted.replace(/^##\s+(.+)$/gm, '<h2>$1</h2>');
+            formatted = formatted.replace(/^#\s+(.+)$/gm, '<h1>$1</h1>');
+            
+            // Unordered list items starting with "-" or "*"
+            formatted = formatted.replace(/^\s*[-*]\s+(.+)$/gm, '<li>$1</li>');
+            formatted = formatted.replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>');
+            formatted = formatted.replace(/<\/ul>\s*<ul>/g, '');
+            
+            // Ordered list items starting with numbers
+            formatted = formatted.replace(/^\s*\d+\.\s+(.+)$/gm, '<li>$1</li>');
+            formatted = formatted.replace(/(<li>.*<\/li>)/gs, '<ol>$1</ol>');
+            formatted = formatted.replace(/<\/ol>\s*<ol>/g, '');
+            
+            // Translate newlines to HTML line breaks
+            formatted = formatted.replace(/\n/g, '<br>');
+            
+            // Clean double line breaks
+            formatted = formatted.replace(/(<br>\s*){2,}/g, '<br><br>');
+            
+            return formatted;
+        }
+
+        /**
+         * Submits a message to the backend via POST request and renders response
+         */
+        async function sendMessage(textToSend = null) {
+            const message = textToSend !== null ? textToSend : userInput.value.trim();
+            if (!message) return;
+
+            // Clear input field on submission
+            if (textToSend === null) userInput.value = "";
+
+            addMessage(message, true);
+            typingIndicator.style.display = "flex";
+            chatArea.scrollTop = chatArea.scrollHeight;
+
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: message })
+                });
+
+                if (!response.ok) throw new Error("Server Error");
+
+                const data = await response.json();
+                typingIndicator.style.display = "none";
+                addMessage(data.response, false);
+            } catch (error) {
+                console.error(error);
+                typingIndicator.style.display = "none";
+                addMessage("Sorry, an error occurred while connecting to the assistant. Please make sure the Flask backend is running.", false);
+            }
+        }
+
+        /**
+         * Called when a suggested card is clicked
+         */
+        function triggerSuggestion(queryText) {
+            sendMessage(queryText);
+        }
+
+        // Action bindings
+        sendButton.addEventListener("click", () => sendMessage());
+        userInput.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") sendMessage();
+        });
+    </script>
+</body>
+</html>
