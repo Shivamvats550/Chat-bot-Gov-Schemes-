@@ -10,13 +10,15 @@ A conversational chatbot to help users explore and understand Indian government 
 
 ## 🖼️ Demo
 Demo 1
-"C:\Users\shiva\OneDrive\Pictures\Screenshots\Screenshot 2026-06-13 145705.png"
-"C:\Users\shiva\OneDrive\Pictures\Screenshots\Screenshot 2026-06-13 145839.png"
+<img width="1110" height="785" alt="Screenshot 2026-06-13 145705" src="https://github.com/user-attachments/assets/f5c8c936-95cd-4222-8043-8ed52318e532" />
+<img width="1138" height="807" alt="Screenshot 2026-06-13 145839" src="https://github.com/user-attachments/assets/90b4aa63-c67a-4048-ba18-0ffbe4128a3b" />
 ---
 Demo 2
-"C:\Users\shiva\OneDrive\Pictures\Screenshots\Screenshot 2026-06-13 145252.png"
-"C:\Users\shiva\OneDrive\Pictures\Screenshots\Screenshot 2026-06-13 145014.png"
+<img width="1138" height="802" alt="Screenshot 2026-06-13 145252" src="https://github.com/user-attachments/assets/24b1eed7-c7c4-4134-ac10-791d499359ff" />
+<img width="1131" height="768" alt="Screenshot 2026-06-13 145500" src="https://github.com/user-attachments/assets/9145a599-3b92-4782-8766-28455dfc8851" />
+
 ---
+
 
 ## ✨ What It Does
 
